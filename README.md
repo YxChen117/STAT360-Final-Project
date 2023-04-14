@@ -1,7 +1,7 @@
 # STAT360-Final-Project 
 Multivariate Adaptive Regression Splines (MARS)
 
-Team Member1: YuXiang Chen 301368904  
+Team Member1: YuXiang Chen 301368904
 Team Member2: Kangjie Zhang 301385112  
 
 Building a R package, Using MARS Regression  
