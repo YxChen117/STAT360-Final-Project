@@ -1,0 +1,140 @@
+---
+title: "mars"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mars}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+https://github.com/YxChen117/STAT360-Final-Project
+## Introduction to our MARS package
+
+As in the Jerome H. Friedman's (1991) paper, MARS is a algorithm that make predictions using a recursive partition method for non-linear regression models.
+
+## Usage
+```{r eval = F}
+library(MARS)
+mars(formula, data, control=mars.control)
+```
+
+## Arguments
+
+Arguments     | meanings
+------------- | -------------
+formula | a formula that describe the linear combination of response variable with their explanatory variables.
+data    | a data frame containing your data with reponse and explantory varibles.
+control | this argument need three parameters which are Mmax, d and trace. Mmax is used in the forward stepwise function, d is used in the backward stepwise funtion.
+
+
+## Details
+
+MARS involves constructing a model in two stages - the forward and backward stepwise function. Initially, MARS builds a model comprising solely the intercept term. In subsequent steps, it gradually adds basis functions to the model in pairs. During each step, MARS identifies the pair of basis functions that leads to the highest reduction in the sum-of-squares residual error. The two basis functions in the pair are similar except for the use of a different side of a mirrored hinge function. The forward pass may lead to an overfit model, so to develop a model with improved generalization ability, the backward pass prunes the model. In this procedure, each variable is eliminated once to evaluate the model's fit, and this continues until the model can no longer be improved. The comparison of model subsets is carried out using the Generalized Cross Validation (GCV) criterion, which is explained below.
+
+## values
+
+mars() returns an object of class "mars" inheritance from class "lm"
+
+An object of class "mars" is a list containing at least the following components:
+
+call:mars() function call
+
+formula: User input formula
+
+y:Response variable
+
+B:Basis function
+
+Bfuncs:an empty list of length mc$Mmax+1
+
+x:Explanatory variable
+
+control:mars control object
+
+## Author(s)
+
+Kangjie Zhang 301385112
+
+Yuxiang Chen 301368904
+
+## Reference
+
+Multivariate Adaptive Regression Splines
+
+Author(s): Jerome H. Friedman
+
+Source: The Annals of Statistics, Mar., 1991, Vol.19, No.1 (Mar., 1991), pp.1-67
+
+Published by: Institute of Mathematical Statistics
+
+## See also
+
+print(): this function print the linear combination of the mars function, it also shows the coefficient of each explanatory variables.
+
+summary(): this function shows the coefficients of each explanatory and indicates where the covariates split at.
+
+predict(): this function predict for the same data used to fit the model.
+
+plot(): this function plot the residuals vs fitted value with qq plot.
+
+anova():
+
+## Examples
+
+```{r include= F}
+setwd("C://Users//60906//Downloads//360 project-20230416T010114Z-001//360 project//mars//R")
+source("ggplot.R")
+source("mars.R") # location of my mars source file
+source("predict.R")
+source("anova.R")
+source("print.R")
+source("summary.R")
+library(MASS)
+library(ISLR)
+```
+
+## R Markdown
+
+
+
+```{r}
+# Test 2: Wage dataset
+data("Wage")
+mc <- mars.control(Mmax = 10)
+wagem <- mars(wage ~ age + education + year, data=Wage, control=mc)
+ffwage <- fitted(wagem)
+pwage <- predict(wagem)
+```
+
+
+```{r}
+print(wagem) # tests print method
+summary.mars(wagem) #test summary method
+ggplot.mars(wagem,data = Wage)
+
+```
+
+
+```{r}
+#Test 3 Mtcars
+car <- data(mtcars)
+mc <- mars.control(Mmax = 10)
+carm <- mars(mpg ~ . , data = mtcars,control = mc)
+ffcar <- fitted(carm)
+pcar <- predict(carm)
+```
+
+
+```{r}
+print(carm)
+ggplot.mars(carm,data = mtcars)
+#anova(carm)
+predict(carm)
+summary(carm)
+```
