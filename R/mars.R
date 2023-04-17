@@ -100,22 +100,19 @@ fwd_stepwise <- function(y,x,control){
         tt <- split_points(x[,v],B[,m])
         for(t in tt){
           Bnew = data.frame(B[,(1:M)],
-                            B1 = B[,m]*h(+1,x[,v],t),
-                            B2 = B[,m]*h(-1,x[,v],t))
+                            Btem1 = B[,m]*h(+1,x[,v],t),
+                            Btem2 = B[,m]*h(-1,x[,v],t))
           gdat <- data.frame(y=y, Bnew)
           lof <- LOF(y~.,gdat,control)
           if (lof < lof_best){
             lof_best <- lof
-            mstar <- m
-            vstar <- v
-            tstar <- t
             splits[M,] <- c(m,v,t)
           }
         }
       }
     }
-
     m <- splits[M,1]; v <- splits[M,2]; t <- splits[M,3]
+    mstar <- m; vstar <- v;tstar <- t
     Bfuncs[[M+1]] <- rbind(Bfuncs[[mstar]],c(s=-1,vstar,tstar))
     Bfuncs[[M+2]] <- rbind(Bfuncs[[mstar]],c(s=+1,vstar,tstar))
     B[,M+1] <- B[,m] * h(-1,x[,v],t)
@@ -124,6 +121,11 @@ fwd_stepwise <- function(y,x,control){
   }
   colnames(B) <- paste0("B",(0:(ncol(B)-1)))
   #return(list)
+  for (i in 1:length(Bfuncs)){
+    if (!is.null(Bfuncs[[i]])){
+      colnames(Bfuncs[[i]]) <- c("s","v","t")
+    }
+  }
   return(list(y=y,B=B,Bfuncs=Bfuncs))
 }
 
@@ -133,15 +135,15 @@ bwd_stepwise <- function(fwd,control){
   Jstar <- 1:(Mmax+1)
   Kstar <- Jstar
   dat <- data.frame(y = fwd$y,fwd$B)
-  lofstar <- LOF(y~.,dat,control)
+  lofstar <- LOF(y~.-1,dat,control)
   for (M in ((Mmax+1):2)){
     b <- Inf
     L <- Kstar
     if(control$trace) cat("L:",L,"\n")
-    for (m in 2:(control$Mmax+1)){
+    for (m in L){
       K<- setdiff(L,m)
       gdat <- data.frame(y = fwd$y,fwd$B[,K])
-      lof <- LOF(y~.,gdat,control)
+      lof <- LOF(y~.-1,gdat,control)
       if (lof > b){
         b <- lof
         Kstar <- K
